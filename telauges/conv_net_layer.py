@@ -102,6 +102,8 @@ class ConvNetLayer(object):
                                        border_mode=self.border_mode);
                                        
     self.out_feature_maps=self.get_activation(self.pooled_out);
+    
+    self.params=[self.filters, self.b];
   
   def get_conv_pool(self,
                     feature_maps,
