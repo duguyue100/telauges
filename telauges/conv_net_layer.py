@@ -93,13 +93,13 @@ class ConvNetLayer(object):
     self.b = theano.shared(value=b_values, borrow=True);
     
     self.pooled, self.pooled_out=self.get_conv_pool(feature_maps=self.in_feature_maps,
-                                       feature_shape=self.feature_shape,
-                                       filters=self.filters,
-                                       filter_shape=self.filter_shape,
-                                       bias=self.b,
-                                       pool=self.pool,
-                                       pool_size=self.pool_size,
-                                       border_mode=self.border_mode);
+                                                    feature_shape=self.feature_shape,
+                                                    filters=self.filters,
+                                                    filter_shape=self.filter_shape,
+                                                    bias=self.b,
+                                                    pool=self.pool,
+                                                    pool_size=self.pool_size,
+                                                    border_mode=self.border_mode);
                                        
     self.out_feature_maps=self.get_activation(self.pooled_out);
     
@@ -140,4 +140,15 @@ class ConvNetLayer(object):
   def get_out_feature_maps(self):
     return self.out_feature_maps;
   
-  
+  def get_output(self, x):
+    
+    _, pooled_out=self.get_conv_pool(feature_maps=x,
+                                     feature_shape=self.feature_shape,
+                                     filters=self.filters,
+                                     filter_shape=self.filter_shape,
+                                     bias=self.b,
+                                     pool=self.pool,
+                                     pool_size=self.pool_size,
+                                     border_mode=self.border_mode);
+    
+    return self.get_activation(pooled_out);

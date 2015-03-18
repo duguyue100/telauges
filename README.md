@@ -5,6 +5,8 @@ Fresh start for my deep learning algorithms
 
 + MLP Hidden Layer
 + Softmax Layer
++ Denoising Auto-encoder
++ ConvNet Layer
 
 ## Contact
 

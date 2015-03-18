@@ -225,18 +225,3 @@ class AutoEncoder(object):
              for param_i, grad_i in zip(params, gparams)];
              
     return cost, updates;
-
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
