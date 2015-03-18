@@ -92,7 +92,7 @@ class ConvNetLayer(object):
     b_values = np.zeros((filter_shape[0],), dtype='float32');
     self.b = theano.shared(value=b_values, borrow=True);
     
-    self.pooled_out=self.get_conv_pool(feature_maps=self.in_feature_maps,
+    self.pooled, self.pooled_out=self.get_conv_pool(feature_maps=self.in_feature_maps,
                                        feature_shape=self.feature_shape,
                                        filters=self.filters,
                                        filter_shape=self.filter_shape,
