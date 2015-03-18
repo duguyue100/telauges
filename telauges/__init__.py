@@ -7,4 +7,5 @@
 
 __all__=["hidden_layer",
          "nnfuns",
-         "utils"]
+         "utils",
+         "conv_net_layer"]

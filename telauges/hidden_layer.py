@@ -37,7 +37,9 @@ class HiddenLayer(object):
     @param activate_mode: 5 non-linearity function: tanh, sigmoid, relu, softplus and softmax (string)    
     """
     
-    self.input = data_in;
+    self.input=data_in;
+    self.n_in=n_in;
+    self.n_out=n_out;
     self.activate_mode=activate_mode;
 
     if (self.activate_mode=="tanh"):
