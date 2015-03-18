@@ -49,7 +49,8 @@ class ConvNetLayer(object):
                           "tanh" for tanh function;
                           "relu" for ReLU function;
                           "sigmoid" for Sigmoid function;
-                          "softplus" for Softplus function (string)
+                          "softplus" for Softplus function;
+                          "linear" for linear function (string)
     """
     
     self.rng=rng;
@@ -72,6 +73,8 @@ class ConvNetLayer(object):
       self.activation=nnf.softplus;
     elif (self.activate_mode=="softmax"):
       self.activation=nnf.softmax;
+    elif (self.activate_mode=="linear"):
+      self.activation=nnf.linear;
     else:
       raise ValueError("Value %s is not a valid choice of activation function"
                        % self.activate_mode);

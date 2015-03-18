@@ -36,3 +36,9 @@ def softmax(x):
   Softmax function
   """
   return T.nnet.softmax(x);
+
+def linear(x):
+  """
+  Linear function
+  """
+  return x;

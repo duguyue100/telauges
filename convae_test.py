@@ -16,7 +16,7 @@ from telauges.conv_ae import ConvAE;
 n_epochs=50;
 training_portion=1;
 batch_size=200;
-nkerns=50;
+nkerns=16;
 
 datasets=utils.load_mnist("data/mnist.pkl.gz");
 rng=np.random.RandomState(23455);
@@ -47,9 +47,9 @@ images=X.reshape((batch_size, 1, 28, 28))
 ae=ConvAE(rng=rng,
           feature_maps=images,
           feature_shape=(batch_size, 1, 28, 28),
-          filter_shape=(nkerns, 1, 7, 7),
+          filter_shape=(nkerns, 1, 11, 11),
           encode_activate_mode="relu",
-          decode_activate_mode="sigmoid");
+          decode_activate_mode="linear");
           
 cost, updates=ae.get_updates(learning_rate=0.1);
 
@@ -62,8 +62,8 @@ print "[MESSAGE] The model is built";
 print "[MESSAGE] Start training"
 
 filters=ae.encode_layer.filters.get_value(borrow=True);
-for i in xrange(50):
-  plt.subplot(8, 7, i);
+for i in xrange(16):
+  plt.subplot(4, 4, i);
   plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');
   plt.axis('off')
 plt.show();
@@ -79,8 +79,8 @@ while (epoch < n_epochs):
   
   
 filters=ae.encode_layer.filters.get_value(borrow=True);
-for i in xrange(50):
-  plt.subplot(8, 7, i);
+for i in xrange(16):
+  plt.subplot(4, 4, i);
   plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');
   plt.axis('off')
 plt.show();

@@ -45,7 +45,7 @@ ae=AutoEncoder(rng=rng,
                n_vis=784,
                n_hidden=500,
                encode_activate_mode="relu",
-               decode_activate_mode="sigmoid");
+               decode_activate_mode="relu");
                
 
     

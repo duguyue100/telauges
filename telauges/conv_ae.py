@@ -101,9 +101,9 @@ class ConvAE(object):
     else:
       y=self.decode_layer.out_feature_maps;
       
-    #cost=T.sum(T.pow(T.sub(self.decode_layer.output, x),2), axis=1);
+    cost=T.sum(T.pow(T.sub(self.decode_layer.out_feature_maps, self.feature_maps),2), axis=1);
     
-    cost=self.get_cost(self.feature_maps, y);    
+    #cost=self.get_cost(self.feature_maps, y);    
     cost=T.mean(cost);
     
     params=self.encode_layer.params+self.decode_layer.params;
