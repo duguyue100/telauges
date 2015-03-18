@@ -93,17 +93,17 @@ class ConvAE(object):
                   learning_rate,
                   corruption_level=None,
                   L1_rate=0.000,
-                  L2_rate=0.000,):
+                  L2_rate=0.000):
     
     if corruption_level is not None:
       x=self.get_corruption_input(self.input, corruption_level);
       y=self.decode_layer.get_output(self.encode_layer.get_output(x));
     else:
-      y=self.decode_layer.output;
+      y=self.decode_layer.out_feature_maps;
       
     #cost=T.sum(T.pow(T.sub(self.decode_layer.output, x),2), axis=1);
     
-    cost=self.get_cost(self.input, y);    
+    cost=self.get_cost(self.feature_maps, y);    
     cost=T.mean(cost);
     
     params=self.encode_layer.params+self.decode_layer.params;
