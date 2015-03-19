@@ -7,7 +7,7 @@ Fresh start for my deep learning algorithms
 + Softmax Layer
 + Denoising Auto-encoder
 + ConvNet Layer
-+ ConvAE [Feature Learning is not right]
++ ConvAE
 
 ## Contact
 
