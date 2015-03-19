@@ -48,8 +48,8 @@ ae=ConvAE(rng=rng,
           feature_maps=images,
           feature_shape=(batch_size, 1, 28, 28),
           filter_shape=(nkerns, 1, 7, 7),
-          encode_activate_mode="relu",
-          decode_activate_mode="sigmoid");
+          encode_activate_mode="tanh",
+          decode_activate_mode="tanh");
           
 cost, updates=ae.get_updates(learning_rate=0.1);
 

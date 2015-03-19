@@ -56,9 +56,6 @@ layer_0=ConvNetLayer(rng=rng,
                      
 filters=layer_0.filters;
 
-print filters.get_value(borrow=True).shape;
-print filters.get_value(borrow=True)[0,0,:,:];
-
 for i in xrange(nkerns[0]):
   plt.subplot(8, 7, i);
   plt.imshow(filters.get_value(borrow=True)[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');

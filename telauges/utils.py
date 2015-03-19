@@ -8,7 +8,8 @@
 import os;
 import gzip, cPickle;
 
-import numpy, theano;
+import numpy as np;
+import theano;
 import theano.tensor as T;
 
 def load_mnist(dataset):
@@ -42,14 +43,17 @@ def load_mnist(dataset):
   train_set, valid_set, test_set = cPickle.load(f);
   f.close();
   
+  mean_image=get_mean_image(train_set[0]);
+  
   def shared_dataset(data_xy, borrow=True):
         
     data_x, data_y = data_xy;
-    shared_x = theano.shared(numpy.asarray(data_x,
-                                           dtype='float32'),
+    data_x-=mean_image;
+    shared_x = theano.shared(np.asarray(data_x,
+                                        dtype='float32'),
                              borrow=borrow);
-    shared_y = theano.shared(numpy.asarray(data_y,
-                                           dtype='float32'),
+    shared_y = theano.shared(np.asarray(data_y,
+                                        dtype='float32'),
                              borrow=borrow);
         
     return shared_x, T.cast(shared_y, 'int32');
@@ -61,3 +65,22 @@ def load_mnist(dataset):
   rval = [(train_set_x, train_set_y), (valid_set_x, valid_set_y),
           (test_set_x, test_set_y)];
   return rval;
+
+def standardlize_image(X):
+  """
+  
+  """
+  
+def get_mean_image(X):
+  """
+  Get average image from training set
+  
+  @param X: image matrix, each row is a image vector (N x M)
+  """
+  
+  return np.mean(X, axis=0);
+  
+  
+  
+  
+  
