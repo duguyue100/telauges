@@ -43,12 +43,12 @@ def load_mnist(dataset):
   train_set, valid_set, test_set = cPickle.load(f);
   f.close();
   
-  mean_image=get_mean_image(train_set[0]);
+  #mean_image=get_mean_image(train_set[0]);
   
   def shared_dataset(data_xy, borrow=True):
         
     data_x, data_y = data_xy;
-    data_x-=mean_image;
+    #data_x-=mean_image;
     shared_x = theano.shared(np.asarray(data_x,
                                         dtype='float32'),
                              borrow=borrow);

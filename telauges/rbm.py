@@ -83,6 +83,17 @@ class RBM(object):
     
     return [pre_activation, self.activation(pre_activation)];
   
+  def sample_h_given_v(self, v0_sample):
+    
+    pre_h1, h1_mean=self.prop_up(v0_sample);
+    
+    h1_sample=self.theano_rng.binomial(size=h1_mean.shape,
+                                       n=1,
+                                       p=h1_mean,
+                                       dtype="float32");
+                                       
+    return [pre_h1, h1_mean, h1_sample];
+  
   def prop_down(self,
                 hidden):
     
@@ -90,4 +101,103 @@ class RBM(object):
     
     return [pre_activation, self.activation(pre_activation)];
   
+  def sample_v_given_h(self, h0_sample):
+    
+    pre_v1, v1_mean=self.prop_down(h0_sample);
+    
+    v1_sample=self.theano_rng.binomial(size=v1_mean.shape,
+                                       n=1,
+                                       p=v1_mean,
+                                       dtype="float32");
+                                       
+    return [pre_v1, v1_mean, v1_sample];
   
+  def gibbs_hvh(self, h0_sample):
+    
+    pre_v1, v1_mean, v1_sample=self.sample_v_given_h(h0_sample);
+    pre_h1, h1_mean, h1_sample=self.sample_h_given_v(v1_sample);
+    
+    return [pre_v1, v1_mean, v1_sample,
+            pre_h1, h1_mean, h1_sample];
+            
+  def gibbs_vhv(self, v0_sample):
+    
+    pre_h1, h1_mean, h1_sample=self.sample_h_given_v(v0_sample);
+    pre_v1, v1_mean, v1_sample=self.sample_v_given_h(h1_sample);
+    
+    return [pre_h1, h1_mean, h1_sample,
+            pre_v1, v1_mean, v1_sample];
+            
+  def free_energy(self, v_sample):
+    
+    wx_b=T.dot(v_sample, self.W)+self.h_bias;
+    vbias_term=T.dot(v_sample, self.v_bias);
+    hidden_term=T.sum(T.log(1+T.exp(wx_b)), axis=1);
+    
+    return -hidden_term-vbias_term;
+  
+  def get_updates(self,
+                  learning_rate=0.1,
+                  presistent=None,
+                  k=1):
+    
+    pre_ph, ph_mean, ph_sample=self.sample_h_given_v(self.input);
+    
+    if presistent is None:
+      chain_start=ph_sample;
+    else:
+      chain_start=presistent;
+      
+    ([pre_nvs,
+      nv_means,
+      nv_samples,
+      pre_nhs,
+      nh_means,
+      nh_samples],
+      updates)=theano.scan(self.gibbs_hvh,
+                           outputs_info=[None, None, None, None, None, chain_start],
+                           n_steps=k);
+                               
+    chain_end=nv_samples[-1];
+    
+    cost=T.mean(self.free_energy(self.input))-T.mean(self.free_energy(chain_end));
+    
+    gparams=T.grad(cost, self.params, consider_constant=[chain_end]);
+    
+    for gparam, param in zip(gparams, self.params):
+      updates[param]=param-gparam*T.cast(learning_rate, dtype="float32");
+      
+    if presistent:
+      updates[presistent]=nh_samples[-1];
+      
+      monitoring_cost=self.get_pseudo_cost(updates);
+    else:
+      monitoring_cost=self.get_reconstruction_cost(updates,
+                                                   pre_nvs[-1]);
+                                              
+    return monitoring_cost, updates;
+  
+  def get_pseudo_cost(self, updates):
+    
+    bit_i_idx=theano.shared(value=0, name="bit_i_idx");
+    
+    xi=T.round(self.input);
+    
+    fe_xi=self.free_energy(xi);
+    
+    xi_flip=T.set_subtensor(xi[:, bit_i_idx],
+                            1-xi[:, bit_i_idx]);
+                            
+    fe_xi_flip=self.free_energy(xi_flip);
+    
+    cost=T.mean(self.n_vis*T.log(self.activation(fe_xi_flip-fe_xi)));
+    
+    updates[bit_i_idx]=(bit_i_idx+1) % self.n_vis;
+    
+    return cost;
+  
+  def get_reconstruction_cost(self,
+                              updates,
+                              pre_nv):
+    
+    return T.nnet.binary_crossentropy(self.input, self.activation(pre_nv)).mean();
