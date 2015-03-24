@@ -10,4 +10,7 @@ __all__=["hidden_layer",
          "utils",
          "conv_net_layer",
          "conv_ae",
-         "rbm"]
+         "rbm",
+         "layer",
+         "rnn",
+         "lstm"]

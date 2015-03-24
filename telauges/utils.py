@@ -11,6 +11,7 @@ import gzip, cPickle;
 import numpy as np;
 import theano;
 import theano.tensor as T;
+from theano.compile import ViewOp;
 
 def load_mnist(dataset):
   """
@@ -80,7 +81,44 @@ def get_mean_image(X):
   
   return np.mean(X, axis=0);
   
+def get_shared_matrix(name,
+                      out_size,
+                      in_size=None):
+  """
+  create shared weights or weights
   
+  @param out_size: output size (int)
+  @param in_size: input size (int)
   
+  @return: a shared matrix with size of in_size x out_size
+  """
   
+  if in_size==None:
+    return theano.shared(value=np.asarray(np.random.uniform(low=0,
+                                                            high=1./out_size,
+                                                            size=(out_size, )),
+                                          dtype="float32"),
+                         name=name,
+                         borrow=True);
+  else:
+    return theano.shared(value=np.asarray(np.random.uniform(low=0,
+                                                            high=1./(out_size+in_size),
+                                                            size=(in_size, out_size)),
+                                          dtype="float32"),
+                         name=name,
+                         borrow=True);
+                         
+class GradClip(ViewOp):
+  def __init__(self,
+               clip_lower_clip,
+               clip_upper_clip):
+    self.clip_lower_clip=clip_lower_clip;
+    self.clip_upper_clip=clip_upper_clip;
+    
+    assert(self.clip_lower_clip<=self.clip_upper_clip);
+    
+  def grad(self,
+           args,
+           g_outs):
+    return [T.clip(g_out, self.clip_lower_clip, self.clip_upper_clip) for g_out in g_outs];
   
