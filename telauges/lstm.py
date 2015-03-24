@@ -71,6 +71,14 @@ class LSTM(RNNLayer):
                  pre_h):
     
     return self.get_activation(data, pre_h);
+  
+  def postproc_activation(self,
+                          x,
+                          *args):
+    if x.ndim>1:
+      return x[self.num_hidden:, :];
+    else:
+      return x[self.num_hidden:];
     
   @property
   def params(self):

@@ -13,4 +13,6 @@ __all__=["hidden_layer",
          "rbm",
          "layer",
          "rnn",
-         "lstm"]
+         "lstm",
+         "optimization",
+         "stacked_layers"]
