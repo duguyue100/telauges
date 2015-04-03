@@ -1,10 +1,3 @@
-"""
-@author: Yuhuang Hu
-@contact: duguyue100@gmail.com
-
-@note: Extract MNIST feature
-"""
-
 import cPickle as pickle;
 
 import numpy as np;
@@ -18,25 +11,48 @@ from telauges.hidden_layer import AutoEncoder;
 n_epochs=100;
 training_portion=1;
 batch_size=100;
-
-datasets=utils.load_mnist("data/mnist.pkl.gz");
 rng=np.random.RandomState(23455);
 
-### Loading and preparing dataset
-train_set_x, train_set_y = datasets[0];
-valid_set_x, valid_set_y = datasets[1];
-test_set_x, test_set_y = datasets[2];
+Xtr, Ytr, Xte, Yte=utils.load_CIFAR10("/home/arlmaster/workspace/telauges/data/CIFAR10");
+
+Xtr=np.mean(Xtr, 3);
+Xte=np.mean(Xte, 3);
+Xtrain=Xtr.reshape(Xtr.shape[0], Xtr.shape[1]*Xtr.shape[2])/255.0;
+Xtest=Xte.reshape(Xte.shape[0], Xte.shape[1]*Xte.shape[2])/255.0;
+#Xtrain=np.hstack((Ytr[None].T, Xtrain))[0:10000];
+#Xtrain=Xtrain[Xtrain[:,0].argsort()];
+
+print Xtrain.shape;
+print Xtest.shape;
+
+#data_train=(Xtrain, Ytr);
+#data_test=(Xtest, Yte);
+#train_set_x=utils.shared_dataset(data_train);
+#test_set_x=utils.shared_dataset(data_test);
+
+train_set_x=theano.shared(np.asarray(Xtrain,
+                                     dtype='float32'),
+                          borrow=True);
+train_set_y=theano.shared(np.asarray(Ytr,
+                                     dtype='float32'),
+                          borrow=True);
+train_set_y=T.cast(train_set_y, dtype="int32");                          
+
+test_set_x=theano.shared(np.asarray(Xtest,
+                                    dtype='float32'),
+                         borrow=True);
+test_set_y=theano.shared(np.asarray(Yte,
+                                    dtype='float32'),
+                         borrow=True);
+test_set_y=T.cast(test_set_y, dtype="int32");
 
 n_train_batches=int(train_set_x.get_value(borrow=True).shape[0]*training_portion);
-n_valid_batches=valid_set_x.get_value(borrow=True).shape[0];
 n_test_batches=test_set_x.get_value(borrow=True).shape[0];
 
 print n_train_batches;
-print n_valid_batches;
 print n_test_batches;
     
 n_train_batches /= batch_size; # number of train data batches
-n_valid_batches /= batch_size; # number of valid data batches
 n_test_batches /= batch_size;  # number of test data batches
 
 print "[MESSAGE] The data is loaded"
@@ -48,8 +64,8 @@ index=T.lscalar();
 
 ae=AutoEncoder(rng=rng,
                data_in=X,
-               n_vis=784,
-               n_hidden=500,
+               n_vis=1024,
+               n_hidden=200,
                encode_activate_mode="sigmoid",
                decode_activate_mode="sigmoid");
                
@@ -71,7 +87,7 @@ filters=ae.encode_layer.W.get_value(borrow=True);
 
 for i in xrange(100):
   plt.subplot(10, 10, i);
-  plt.imshow(np.reshape(filters[:,i], (28, 28)), cmap = plt.get_cmap('gray'), interpolation='nearest');
+  plt.imshow(np.reshape(filters[:,i], (32, 32)), cmap = plt.get_cmap('gray'), interpolation='nearest');
   plt.axis('off')
 plt.show();
 
@@ -88,7 +104,7 @@ while (epoch < n_epochs):
 filters=ae.encode_layer.W.get_value(borrow=True);
 for i in xrange(100):
   plt.subplot(10, 10, i);
-  plt.imshow(np.reshape(filters[:,i], (28, 28)), cmap = plt.get_cmap('gray'), interpolation='nearest');
+  plt.imshow(np.reshape(filters[:,i], (32, 32)), cmap = plt.get_cmap('gray'), interpolation='nearest');
   plt.axis('off')
 plt.show();
 
@@ -135,8 +151,8 @@ train_feature.view("float32, float32, float32").sort(order=["f1"], axis=0);
 print train_feature.shape;
 print "[MESSAGE] Writing training set to file"
 
-pickle.dump(train_feature, open("mnist_train_feature_ordered.pkl", "w"));
-pickle.dump(train_feature_random, open("mnist_train_feature_random.pkl", "w"));
+pickle.dump(train_feature, open("cifar10_train_feature_ordered.pkl", "w"));
+pickle.dump(train_feature_random, open("cifar10_train_feature_random.pkl", "w"));
 
 print "[MESSAGE] Training set is prepared"
 
@@ -161,7 +177,7 @@ test_feature.view("float32, float32, float32").sort(order=["f1"], axis=0);
 print test_feature.shape;
 print "[MESSAGE] Writing testing set to file"
 
-pickle.dump(test_feature, open("mnist_test_feature_ordered.pkl", "w"));
-pickle.dump(test_feature_random, open("mnist_test_feature_random.pkl", "w"));
+pickle.dump(test_feature, open("cifar10_test_feature_ordered.pkl", "w"));
+pickle.dump(test_feature_random, open("cifar10_test_feature_random.pkl", "w"));
 
 print "[MESSAGE] Testing set is prepared"

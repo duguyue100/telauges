@@ -7,11 +7,100 @@
 
 import os;
 import gzip, cPickle;
+import cPickle as pickle;
 
 import numpy as np;
+import matplotlib.pyplot as plt;
 import theano;
 import theano.tensor as T;
 from theano.compile import ViewOp;
+
+def load_CIFAR_batch(filename):
+    """
+    load single batch of cifar-10 dataset
+    
+    code is adapted from CS231n assignment kit
+    
+    @param filename: string of file name in cifar
+    @return: X, Y: data and labels of images in the cifar batch
+    """
+    
+    with open(filename, 'r') as f:
+        datadict=pickle.load(f);
+        
+        X=datadict['data'];
+        Y=datadict['labels'];
+        
+        X=X.reshape(10000, 3, 32, 32).transpose(0,2,3,1).astype("float");
+        Y=np.array(Y);
+        
+        return X, Y;
+        
+        
+def load_CIFAR10(ROOT):
+    """
+    load entire CIFAR-10 dataset
+    
+    code is adapted from CS231n assignment kit
+    
+    @param ROOT: string of data folder
+    @return: Xtr, Ytr: training data and labels
+    @return: Xte, Yte: testing data and labels
+    """
+    
+    xs=[];
+    ys=[];
+    
+    for b in range(1,6):
+        f=os.path.join(ROOT, "data_batch_%d" % (b, ));
+        X, Y=load_CIFAR_batch(f);
+        xs.append(X);
+        ys.append(Y);
+        
+    Xtr=np.concatenate(xs);
+    Ytr=np.concatenate(ys);
+    
+    del X, Y;
+    
+    Xte, Yte=load_CIFAR_batch(os.path.join(ROOT, "test_batch"));
+    
+    return Xtr, Ytr, Xte, Yte;
+
+def visualize_CIFAR(X_train,
+                    y_train,
+                    samples_per_class):
+    """
+    A visualize function for CIFAR 
+    """
+    
+    classes = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck'];
+    num_classes=len(classes);
+    
+    for y, cls in enumerate(classes):
+        idxs = np.flatnonzero(y_train == y)
+        idxs = np.random.choice(idxs, samples_per_class, replace=False)
+        for i, idx in enumerate(idxs):
+            plt_idx = i * num_classes + y + 1
+            plt.subplot(samples_per_class, num_classes, plt_idx)
+            plt.imshow(X_train[idx].astype('uint8'))
+            plt.axis('off')
+            if i == 0:
+                plt.title(cls)
+    
+    plt.show();
+    
+def shared_dataset(data_xy, borrow=True):
+        
+  data_x, data_y = data_xy;
+  #data_x-=mean_image;
+  shared_x = theano.shared(np.asarray(data_x,
+                                      dtype='float32'),
+                           borrow=borrow);
+  shared_y = theano.shared(np.asarray(data_y,
+                                      dtype='float32'),
+                           borrow=borrow);
+        
+  return shared_x, T.cast(shared_y, 'int32');
 
 def load_mnist(dataset):
   """
@@ -45,19 +134,6 @@ def load_mnist(dataset):
   f.close();
   
   #mean_image=get_mean_image(train_set[0]);
-  
-  def shared_dataset(data_xy, borrow=True):
-        
-    data_x, data_y = data_xy;
-    #data_x-=mean_image;
-    shared_x = theano.shared(np.asarray(data_x,
-                                        dtype='float32'),
-                             borrow=borrow);
-    shared_y = theano.shared(np.asarray(data_y,
-                                        dtype='float32'),
-                             borrow=borrow);
-        
-    return shared_x, T.cast(shared_y, 'int32');
 
   test_set_x, test_set_y = shared_dataset(test_set);
   valid_set_x, valid_set_y = shared_dataset(valid_set);

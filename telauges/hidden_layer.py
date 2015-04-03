@@ -213,7 +213,7 @@ class AutoEncoder(object):
     else:
       y=self.decode_layer.output;
       
-    #cost=T.sum(T.pow(T.sub(self.decode_layer.output, x),2), axis=1);
+    #cost=0.5*T.sum(T.pow(T.sub(self.decode_layer.output, x),2), axis=1);
     
     cost=self.get_cost(self.input, y);    
     cost=T.mean(cost);
