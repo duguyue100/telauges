@@ -13,9 +13,9 @@ import matplotlib.pyplot as plt;
 import telauges.utils as utils;
 from telauges.conv_ae import ConvAE;
 
-n_epochs=50;
+n_epochs=10;
 training_portion=1;
-batch_size=20;
+batch_size=50;
 nkerns=49;
 
 datasets=utils.load_mnist("data/mnist.pkl.gz");
@@ -48,10 +48,10 @@ ae=ConvAE(rng=rng,
           feature_maps=images,
           feature_shape=(batch_size, 1, 28, 28),
           filter_shape=(nkerns, 1, 7, 7),
-          encode_activate_mode="tanh",
-          decode_activate_mode="tanh");
+          encode_activate_mode="relu",
+          decode_activate_mode="sigmoid");
           
-cost, updates=ae.get_updates(learning_rate=0.1);
+cost, updates=ae.get_updates(learning_rate=0.2);
 
 train_model = theano.function(inputs=[index],
                               outputs=cost,

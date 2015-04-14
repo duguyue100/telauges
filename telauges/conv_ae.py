@@ -101,16 +101,16 @@ class ConvAE(object):
     else:
       y=self.decode_layer.out_feature_maps;
       
-    #cost=T.sum(T.pow(T.sub(self.decode_layer.out_feature_maps, self.feature_maps),2), axis=1);
+    cost=T.sum(T.pow(T.sub(self.decode_layer.out_feature_maps, self.feature_maps),2), axis=1);
     
-    cost=self.get_cost(self.feature_maps, y);
+    #cost=self.get_cost(self.feature_maps, y);
     cost+=0.001*((self.encode_layer.filters**2).sum()+(self.decode_layer.filters**2).sum());    
     cost=T.mean(cost);
     
     params=self.encode_layer.params+self.decode_layer.params;
     gparams=T.grad(cost, params);
 
-    updates=[(param_i, param_i-0.1*grad_i)
+    updates=[(param_i, param_i-learning_rate*grad_i)
              for param_i, grad_i in zip(params, gparams)];
              
     return cost, updates;

@@ -15,6 +15,25 @@ import theano;
 import theano.tensor as T;
 from theano.compile import ViewOp;
 
+def load_CIFAR_100(filename,
+                   file_type="train"):
+  """
+  Load CIFAR 100 data set
+  """
+  datadict=pickle.load(open(filename, "rb"));
+  
+  X=datadict["data"];
+  Y=datadict["coarse_labels"];
+  
+  if file_type=="train":
+    X=X.reshape(50000, 3, 32, 32).transpose(0,2,3,1).astype("float");
+  elif file_type=="test":
+    X=X.reshape(10000, 3, 32, 32).transpose(0,2,3,1).astype("float");
+    
+  Y=np.array(Y);
+    
+  return X, Y;
+
 def load_CIFAR_batch(filename):
     """
     load single batch of cifar-10 dataset
