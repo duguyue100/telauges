@@ -6,11 +6,8 @@
 The implementation and spirit is taken from https://github.com/JonathanRaiman/theano_lstm
 '''
 
-import numpy as np;
 import theano;
 import theano.tensor as T;
-from theano.gof import OpRemove;
-from theano.tensor.shared_randomstreams import RandomStreams;
 
 import telauges.nnfuns as nnf;
 import telauges.utils as util;
@@ -23,11 +20,15 @@ class Layer(object):
   def __init__(self,
                num_in,
                num_hidden,
+               is_recursive=False,
                activate_mode="tanh",
-               clip_gradients=False):
+               weight_type="none",
+               clip_gradients=False,
+               clip_bound=1):
     """
     @param num_in: dimension of input data (int)
     @param num_hidden: dimension of hidden unit (int)
+    @param is_recursive: True - RNN, False - Feedforward network (bool) 
     @param activate_mode: 5 non-linearity function: tanh, sigmoid, relu, softplus and softmax (string)
     @param clip_gradients: if use clip gradients to control weights (bool)
     """
@@ -52,23 +53,28 @@ class Layer(object):
                        % self.activate_mode);
                        
     self.clip_gradients=clip_gradients;
-    self.is_recursive=False;
+    self.clip_bound=clip_bound;
+    self.is_recursive=is_recursive;
     
     # init weights
-    self.get_weights();
+    self.weight_type=weight_type;
+    self.get_weights(self.weight_type);
     
-  def get_weights(self):
+  def get_weights(self,
+                  weight_type="none"):
     """
     Get network weights and bias
+    
+    @param weight_type: "none", "sigmoid", "tanh"
     
     @return: layer weights and bias
     """
     
-    self.W=util.get_shared_matrix("W", self.num_hidden, self.num_in);
-    self.b=util.get_shared_matrix("b", self.num_hidden);
+    self.W=util.get_shared_matrix("W", self.num_hidden, self.num_in, weight_type=weight_type);
+    self.b=util.get_shared_matrix("b", self.num_hidden, weight_type=weight_type);
     
   def get_pre_activation(self,
-                         data):
+                         X):
     """
     Get pre-activation of the data
     
@@ -77,10 +83,10 @@ class Layer(object):
     @return: a pre-activation matrix
     """
     
-    if self.clip_gradients is not False:
-      data=self.clip_gradient(data, self.clip_gradients);
+    if self.clip_gradients is True:
+      X=theano.gradient.grad_clip(X, -self.clip_bound, self.clip_bound);
     
-    return T.dot(data, self.W)+self.b;
+    return T.dot(X, self.W)+self.b;
   
   def get_activation(self,
                      pre_activation):
@@ -95,29 +101,16 @@ class Layer(object):
     return self.activation(pre_activation);
     
   def get_output(self,
-                 data):
+                 X):
     """
     Get layer activation from input data
     
-    @param data: input data, assume row-wise
+    @param X: input data, assume row-wise
     
     @return layer activation
     """
     
-    return self.get_activation(self.get_pre_activation(data));
-  
-  def clip_gradient(self,
-                    data,
-                    bound):
-    grad_clip=util.GradClip(-bound, bound);
-    
-    try:
-      T.opt.register_canonicalize(OpRemove(grad_clip),
-                                  name="grad_clip_%.1f" % (bound));
-    except ValueError:
-      pass
-    
-    return grad_clip(data);
+    return self.get_activation(self.get_pre_activation(X));
   
   @property
   def params(self):
