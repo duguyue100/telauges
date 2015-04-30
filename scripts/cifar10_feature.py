@@ -65,7 +65,7 @@ index=T.lscalar();
 ae=AutoEncoder(rng=rng,
                data_in=X,
                n_vis=1024,
-               n_hidden=200,
+               n_hidden=500,
                encode_activate_mode="sigmoid",
                decode_activate_mode="sigmoid");
                
@@ -151,8 +151,8 @@ train_feature.view("float32, float32, float32").sort(order=["f1"], axis=0);
 print train_feature.shape;
 print "[MESSAGE] Writing training set to file"
 
-pickle.dump(train_feature, open("cifar10_train_feature_ordered.pkl", "w"));
-pickle.dump(train_feature_random, open("cifar10_train_feature_random.pkl", "w"));
+pickle.dump(train_feature, open("cifar10_train_feature_500_ordered.pkl", "w"));
+pickle.dump(train_feature_random, open("cifar10_train_feature_500_random.pkl", "w"));
 
 print "[MESSAGE] Training set is prepared"
 
@@ -177,7 +177,7 @@ test_feature.view("float32, float32, float32").sort(order=["f1"], axis=0);
 print test_feature.shape;
 print "[MESSAGE] Writing testing set to file"
 
-pickle.dump(test_feature, open("cifar10_test_feature_ordered.pkl", "w"));
-pickle.dump(test_feature_random, open("cifar10_test_feature_random.pkl", "w"));
+pickle.dump(test_feature, open("cifar10_test_feature_500_ordered.pkl", "w"));
+pickle.dump(test_feature_random, open("cifar10_test_feature_500_random.pkl", "w"));
 
 print "[MESSAGE] Testing set is prepared"
