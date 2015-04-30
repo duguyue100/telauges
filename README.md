@@ -8,6 +8,7 @@ Fresh start for my deep learning algorithms
 + Denoising Auto-encoder
 + ConvNet Layer
 + ConvAE
++ Abstract Layer [2015-04-30]
 
 ## Contact
 
