@@ -107,13 +107,14 @@ class ConvNetLayer(object):
     self.out_feature_maps=self.get_activation(self.pooled_out);
     
     self.params=[self.filters, self.b];
-  
+    
   def get_conv_pool(self,
                     feature_maps,
                     feature_shape,
                     filters,
                     filter_shape,
                     bias,
+                    subsample=(1,1),
                     pool=False,
                     pool_size=(2,2),
                     border_mode="valid"):
@@ -126,7 +127,8 @@ class ConvNetLayer(object):
                          filters=filters, 
                          image_shape=feature_shape,
                          filter_shape=filter_shape,
-                         border_mode=border_mode);
+                         border_mode=border_mode,
+                         subsample=subsample);
     
     if pool==True:
       pooled_out=downsample.max_pool_2d(input=conv_out,

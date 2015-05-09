@@ -120,3 +120,22 @@ class Layer(object):
   def params(self, param_list):
     self.W.set_value(param_list[0].get_value());
     self.b.set_value(param_list[1].get_value());
+
+class SoftmaxLayer(Layer):
+  """
+  A softmax layer
+  """
+  
+  def __init__(self,
+               num_in,
+               num_out):
+    
+    super(SoftmaxLayer, self).__init__(num_in=num_in,
+                                       num_out=num_out,
+                                       is_recursive=False,
+                                       activate_mode="softmax",
+                                       weight_type="none",
+                                       clip_gradients=False,
+                                       clip_bound=1);
+                                       
+                                       

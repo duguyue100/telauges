@@ -13,22 +13,26 @@ import matplotlib.pyplot as plt;
 import telauges.utils as utils;
 from telauges.conv_ae import ConvAE;
 
-n_epochs=10;
+n_epochs=50;
 training_portion=1;
-batch_size=50;
+batch_size=100;
 nkerns=49;
 
-datasets=utils.load_mnist("data/mnist.pkl.gz");
+datasets=utils.load_mnist("../data/mnist.pkl.gz");
 rng=np.random.RandomState(23455);
 
 ### Loading and preparing dataset
 train_set_x, train_set_y = datasets[0];
 valid_set_x, valid_set_y = datasets[1];
 test_set_x, test_set_y = datasets[2];
-    
+
 n_train_batches=int(train_set_x.get_value(borrow=True).shape[0]*training_portion);
 n_valid_batches=valid_set_x.get_value(borrow=True).shape[0];
 n_test_batches=test_set_x.get_value(borrow=True).shape[0];
+
+print n_train_batches;
+print n_valid_batches;
+print n_test_batches;
     
 n_train_batches /= batch_size; # number of train data batches
 n_valid_batches /= batch_size; # number of valid data batches
@@ -47,7 +51,7 @@ images=X.reshape((batch_size, 1, 28, 28))
 ae=ConvAE(rng=rng,
           feature_maps=images,
           feature_shape=(batch_size, 1, 28, 28),
-          filter_shape=(nkerns, 1, 7, 7),
+          filter_shape=(nkerns, 1, 5, 5),
           encode_activate_mode="relu",
           decode_activate_mode="sigmoid");
           
@@ -61,12 +65,12 @@ train_model = theano.function(inputs=[index],
 print "[MESSAGE] The model is built";
 print "[MESSAGE] Start training"
 
-filters=ae.encode_layer.filters.get_value(borrow=True);
-for i in xrange(nkerns):
-  plt.subplot(7, 7, i);
-  plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');
-  plt.axis('off')
-plt.show();
+# filters=ae.encode_layer.filters.get_value(borrow=True);
+# for i in xrange(nkerns):
+#   plt.subplot(7, 7, i);
+#   plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');
+#   plt.axis('off')
+# plt.show();
 
 epoch = 0;
 while (epoch < n_epochs):
@@ -81,7 +85,7 @@ while (epoch < n_epochs):
 filters=ae.encode_layer.filters.get_value(borrow=True);
 for i in xrange(nkerns):
   plt.subplot(7, 7, i);
-  plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('hot'), interpolation='nearest');
+  plt.imshow(filters[i,0,:,:], cmap = plt.get_cmap('gray'), interpolation='nearest');
   plt.axis('off')
 plt.show();
           

@@ -17,7 +17,7 @@ n_epochs=1000;
 training_portion=1;
 batch_size=20;
 
-datasets=utils.load_mnist("data/mnist.pkl.gz");
+datasets=utils.load_mnist("../data/mnist.pkl.gz");
 rng=np.random.RandomState(23455);
 
 ### Loading and preparing dataset

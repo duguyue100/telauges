@@ -46,6 +46,7 @@ class ConvAE(object):
     """
     
     self.rng=rng;
+    self.theano_rng=RandomStreams(rng.randint(2 ** 30));
     self.feature_maps=feature_maps;
     self.feature_shape=feature_shape;
     self.filter_shape=filter_shape;
@@ -59,8 +60,8 @@ class ConvAE(object):
                                    border_mode="valid",
                                    activate_mode=self.encode_activate_mode);
                                    
-    feature_shape_temp=np.asarray(feature_shape);
-    filter_shape_temp=np.asarray(filter_shape);
+    feature_shape_temp=np.asarray(self.feature_shape);
+    filter_shape_temp=np.asarray(self.filter_shape);
     feature_shape_decode=(feature_shape_temp[0],
                           filter_shape_temp[0],
                           feature_shape_temp[2]-filter_shape_temp[2]+1,
@@ -89,6 +90,13 @@ class ConvAE(object):
   def get_cost(self, x, y):
     return -T.sum(x * T.log(y) + (1-x)* T.log(1 - y), axis=1);
   
+  def get_corruption_input(self,
+                           x,
+                           corruption_level):
+    return self.theano_rng.binomial(size=x.shape, n=1,
+                                    p=1 - corruption_level,
+                                    dtype="float32") * x;
+  
   def get_updates(self,
                   learning_rate,
                   corruption_level=None,
@@ -96,16 +104,17 @@ class ConvAE(object):
                   L2_rate=0.000):
     
     if corruption_level is not None:
-      x=self.get_corruption_input(self.input, corruption_level);
+      x=self.get_corruption_input(self.feature_maps, corruption_level);
       y=self.decode_layer.get_output(self.encode_layer.get_output(x));
     else:
+      x=self.feature_maps;
       y=self.decode_layer.out_feature_maps;
       
-    cost=T.sum(T.pow(T.sub(self.decode_layer.out_feature_maps, self.feature_maps),2), axis=1);
+    cost=T.sum(T.pow(T.sub(y, x),2), axis=1);
     
     #cost=self.get_cost(self.feature_maps, y);
-    cost+=0.001*((self.encode_layer.filters**2).sum()+(self.decode_layer.filters**2).sum());    
-    cost=T.mean(cost);
+    cost=0.5*T.mean(cost)+0.005*((self.encode_layer.filters**2).sum()+(self.decode_layer.filters**2).sum());
+    #cost=0.5*T.mean(cost)+0.05*((self.encode_layer.filters**2).sum()+(self.decode_layer.filters**2).sum());
     
     params=self.encode_layer.params+self.decode_layer.params;
     gparams=T.grad(cost, params);
